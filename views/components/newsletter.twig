@@ -1,0 +1,130 @@
+{# ============================================================================
+   Newsletter Component
+   ============================================================================ #}
+
+<section class="newsletter">
+  <div class="container">
+    <div class="newsletter__content">
+      <div class="newsletter__text">
+        <h2>Subscribe to Our Newsletter</h2>
+        <p>Get exclusive offers, new product launches, and style tips delivered to your inbox.</p>
+      </div>
+
+      <form class="newsletter__form" id="mainNewsletter">
+        <input 
+          type="email" 
+          placeholder="Enter your email address"
+          required
+          class="newsletter__input"
+        >
+        <button type="submit" class="btn btn-primary">
+          Subscribe
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<style scoped>
+.newsletter {
+  background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-secondary-light) 100%);
+  color: var(--color-white);
+  padding: var(--spacing-3xl) 0;
+  margin: var(--spacing-3xl) 0;
+}
+
+.newsletter__content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-2xl);
+}
+
+.newsletter__text h2 {
+  color: var(--color-white);
+  margin-bottom: var(--spacing-md);
+}
+
+.newsletter__text p {
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 0;
+}
+
+.newsletter__form {
+  display: flex;
+  gap: var(--spacing-md);
+  flex: 1;
+  max-width: 400px;
+}
+
+.newsletter__input {
+  flex: 1;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+  .newsletter__content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .newsletter__form {
+    max-width: 100%;
+    flex-direction: column;
+  }
+
+  .newsletter__form .btn {
+    width: 100%;
+  }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('mainNewsletter');
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const email = this.querySelector('input[type="email"]').value;
+      
+      fetch('/api/newsletter/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: email })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          showNotification('Thank you for subscribing!', 'success');
+          form.reset();
+        }
+      })
+      .catch(error => console.error('Error:', error));
+    });
+  }
+});
+
+function showNotification(message, type) {
+  const notification = document.createElement('div');
+  notification.className = `notification notification-${type}`;
+  notification.textContent = message;
+  notification.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    background: ${type === 'success' ? '#4CAF50' : '#F44336'};
+    color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 9999;
+  `;
+  document.body.appendChild(notification);
+  setTimeout(() => notification.remove(), 3000);
+}
+</script>

@@ -1,0 +1,161 @@
+{# ============================================================================
+   Product Card Component
+   Reusable component for product display across pages
+   ============================================================================ #}
+
+<div class="product-card">
+  {# Product Image with Badge #}
+  <div class="product-card__image">
+    <a href="{{ product.url }}">
+      <img 
+        src="{{ product.image.url }}" 
+        alt="{{ product.name }}"
+        loading="lazy"
+      >
+    </a>
+
+    {# Discount Badge - CRO Important #}
+    {% if product.discount %}
+      <div class="product-card__badge">
+        Save {{ product.discount }}%
+      </div>
+    {% endif %}
+  </div>
+
+  {# Product Content #}
+  <div class="product-card__content">
+    {# Product Title #}
+    <a href="{{ product.url }}" class="product-card__title">
+      {{ product.name }}
+    </a>
+
+    {# Product Price #}
+    <div class="product-card__price">
+      {% if product.discount %}
+        <span class="product-card__price-sale">
+          {{ product.price_after_discount | currency }}
+        </span>
+        <span class="product-card__price-original">
+          {{ product.price | currency }}
+        </span>
+      {% else %}
+        <span class="product-card__price-sale">
+          {{ product.price | currency }}
+        </span>
+      {% endif %}
+    </div>
+
+    {# Product Rating #}
+    {% if product.rating %}
+      <div class="product-card__rating">
+        <div class="stars">
+          {% for i in 1..5 %}
+            <span class="star {% if i <= product.rating %}filled{% endif %}">★</span>
+          {% endfor %}
+        </div>
+        <span class="count">({{ product.reviews_count }})</span>
+      </div>
+    {% endif %}
+
+    {# Action Buttons #}
+    <div class="product-card__actions">
+      <a 
+        href="{{ product.url }}" 
+        class="btn btn-secondary btn-sm"
+      >
+        View Details
+      </a>
+      <button 
+        class="btn btn-primary btn-sm quick-add"
+        data-product-id="{{ product.id }}"
+        data-product-name="{{ product.name }}"
+        data-product-price="{{ product.price_after_discount or product.price }}"
+      >
+        Add to Cart
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Quick add to cart
+  document.querySelectorAll('.quick-add').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const productId = this.dataset.productId;
+      const productName = this.dataset.productName;
+      
+      // Add to cart via API
+      fetch('/api/cart/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          product_id: productId,
+          quantity: 1
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Show success notification
+          showNotification(`${productName} added to cart!`, 'success');
+          
+          // Update cart count
+          updateCartCount();
+          
+          // Open cart drawer
+          const cartDrawer = document.getElementById('cartDrawer');
+          if (cartDrawer) {
+            openCartDrawer();
+          }
+        }
+      })
+      .catch(error => console.error('Error:', error));
+    });
+  });
+});
+
+function showNotification(message, type) {
+  const notification = document.createElement('div');
+  notification.className = `notification notification-${type}`;
+  notification.textContent = message;
+  notification.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    background: ${type === 'success' ? '#4CAF50' : '#F44336'};
+    color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 9999;
+    animation: slideInRight 0.3s ease-in-out;
+  `;
+  document.body.appendChild(notification);
+  setTimeout(() => notification.remove(), 3000);
+}
+
+function updateCartCount() {
+  fetch('/api/cart/count')
+    .then(response => response.json())
+    .then(data => {
+      const cartCount = document.querySelector('.cart-count');
+      if (cartCount) {
+        cartCount.textContent = data.count;
+      }
+    });
+}
+
+function openCartDrawer() {
+  const cartDrawer = document.getElementById('cartDrawer');
+  const cartOverlay = document.getElementById('cartOverlay');
+  if (cartDrawer && cartOverlay) {
+    cartDrawer.classList.add('open');
+    cartOverlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+}
+</script>

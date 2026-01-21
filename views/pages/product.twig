@@ -1,0 +1,360 @@
+{# ============================================================================
+   Product Page Template - CRO Optimized
+   ============================================================================ #}
+
+{% extends "layouts/app.twig" %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    {# Product Gallery - Left Column #}
+    <div class="col-6">
+      <div class="product-page__gallery">
+        {# Main Product Image #}
+        <div class="product-page__main-image">
+          <img 
+            src="{{ product.image.url }}" 
+            alt="{{ product.name }}"
+            id="mainProductImage"
+            loading="lazy"
+          >
+        </div>
+
+        {# Product Image Thumbnails #}
+        {% if product.images %}
+          <div class="product-page__thumbnails">
+            {% for image in product.images %}
+              <img 
+                src="{{ image.url }}" 
+                alt="{{ product.name }}"
+                class="thumbnail-image {% if loop.first %}active{% endif %}"
+                data-full-image="{{ image.url }}"
+                loading="lazy"
+              >
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    {# Product Information - Right Column #}
+    <div class="col-6">
+      <div class="product-page__info">
+        {# Product Title #}
+        <h1 class="product-page__title">{{ product.name }}</h1>
+
+        {# Product Rating #}
+        {% if product.rating %}
+          <div class="product-page__rating">
+            <div class="stars">
+              {% for i in 1..5 %}
+                <span class="star {% if i <= product.rating %}filled{% endif %}">★</span>
+              {% endfor %}
+            </div>
+            <span class="count">({{ product.reviews_count }} reviews)</span>
+          </div>
+        {% endif %}
+
+        {# Pricing Section - CRO Focus #}
+        <div class="product-page__price">
+          {% if product.discount %}
+            <span class="product-page__price-sale">
+              {{ product.price_after_discount | currency }}
+            </span>
+            <span class="product-page__price-original">
+              {{ product.price | currency }}
+            </span>
+            <span class="product-page__discount">
+              Save {{ product.discount }}%
+            </span>
+          {% else %}
+            <span class="product-page__price-sale">
+              {{ product.price | currency }}
+            </span>
+          {% endif %}
+        </div>
+
+        {# Product Description #}
+        {% if product.description %}
+          <div class="product-page__description">
+            {{ product.description }}
+          </div>
+        {% endif %}
+
+        {# Product Options (Size, Color, etc.) #}
+        {% if product.options %}
+          <div class="product-page__options">
+            {% for option in product.options %}
+              <div class="product-page__option">
+                <label for="option-{{ option.id }}">
+                  {{ option.name }}
+                </label>
+                {% if option.type == 'select' %}
+                  <select id="option-{{ option.id }}" name="option_{{ option.id }}">
+                    <option value="">Select {{ option.name }}</option>
+                    {% for value in option.values %}
+                      <option value="{{ value.id }}">{{ value.name }}</option>
+                    {% endfor %}
+                  </select>
+                {% elseif option.type == 'color' %}
+                  <div class="color-options">
+                    {% for value in option.values %}
+                      <label class="color-option">
+                        <input 
+                          type="radio" 
+                          name="option_{{ option.id }}" 
+                          value="{{ value.id }}"
+                        >
+                        <span 
+                          class="color-swatch" 
+                          style="background-color: {{ value.color }}"
+                          title="{{ value.name }}"
+                        ></span>
+                      </label>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        {# Quantity Selector #}
+        <div class="product-page__quantity">
+          <button id="decreaseQty" class="btn btn-sm">−</button>
+          <input 
+            type="number" 
+            id="productQuantity" 
+            name="quantity" 
+            value="1" 
+            min="1"
+            max="{{ product.stock }}"
+          >
+          <button id="increaseQty" class="btn btn-sm">+</button>
+        </div>
+
+        {# Action Buttons - CRO Critical #}
+        <div class="product-page__actions">
+          <button 
+            id="addToCartBtn" 
+            class="btn btn-primary btn-lg btn"
+            data-product-id="{{ product.id }}"
+          >
+            Add to Cart
+          </button>
+          <button 
+            id="buyNowBtn" 
+            class="btn btn-secondary btn-lg btn"
+            data-product-id="{{ product.id }}"
+          >
+            Buy Now
+          </button>
+        </div>
+
+        {# Trust Badges - CRO Important #}
+        <div class="product-page__trust-badges">
+          <div class="badge">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+            </svg>
+            <span>Secure Checkout</span>
+          </div>
+          <div class="badge">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+            <span>14-Day Returns</span>
+          </div>
+          <div class="badge">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+            </svg>
+            <span>Free Shipping</span>
+          </div>
+        </div>
+
+        {# Product Details Tabs #}
+        {% if product.details %}
+          <div class="product-page__details">
+            <div class="tabs">
+              <button class="tab-btn active" data-tab="specifications">
+                Specifications
+              </button>
+              <button class="tab-btn" data-tab="shipping">
+                Shipping Info
+              </button>
+              <button class="tab-btn" data-tab="warranty">
+                Warranty
+              </button>
+            </div>
+
+            <div class="tab-content active" id="specifications">
+              <table class="details-table">
+                <tbody>
+                  {% for key, value in product.details %}
+                    <tr>
+                      <td class="label">{{ key }}</td>
+                      <td class="value">{{ value }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {# Customer Reviews Section - Social Proof #}
+  {% if product.reviews %}
+    <div class="row mt-3">
+      <div class="col-12">
+        <div class="product-page__reviews">
+          <h2>Customer Reviews</h2>
+
+          <div class="reviews-summary">
+            <div class="average-rating">
+              <span class="rating-number">{{ product.average_rating }}</span>
+              <div class="stars">
+                {% for i in 1..5 %}
+                  <span class="star {% if i <= product.average_rating %}filled{% endif %}">★</span>
+                {% endfor %}
+              </div>
+              <span class="total-reviews">Based on {{ product.reviews_count }} reviews</span>
+            </div>
+          </div>
+
+          {% for review in product.reviews %}
+            <div class="product-page__review-item">
+              <div class="author">{{ review.author_name }}</div>
+              <div class="rating">
+                {% for i in 1..5 %}
+                  <span class="star {% if i <= review.rating %}filled{% endif %}">★</span>
+                {% endfor %}
+              </div>
+              <div class="text">{{ review.content }}</div>
+              <div class="date">{{ review.created_at | date('M d, Y') }}</div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+  {# Related Products - Cross-sell #}
+  {% if related_products %}
+    <div class="row mt-3">
+      <div class="col-12">
+        <h2>Related Products</h2>
+        <div class="row">
+          {% for related_product in related_products %}
+            <div class="col-3">
+              {% include 'components/product-card.twig' with { product: related_product } %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+{# JavaScript for Product Page Interactions #}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Thumbnail image switching
+  const thumbnails = document.querySelectorAll('.thumbnail-image');
+  const mainImage = document.getElementById('mainProductImage');
+
+  thumbnails.forEach(thumb => {
+    thumb.addEventListener('click', function() {
+      mainImage.src = this.dataset.fullImage;
+      thumbnails.forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+
+  // Quantity selector
+  const quantityInput = document.getElementById('productQuantity');
+  const decreaseBtn = document.getElementById('decreaseQty');
+  const increaseBtn = document.getElementById('increaseQty');
+
+  decreaseBtn.addEventListener('click', () => {
+    const current = parseInt(quantityInput.value);
+    if (current > 1) quantityInput.value = current - 1;
+  });
+
+  increaseBtn.addEventListener('click', () => {
+    const current = parseInt(quantityInput.value);
+    const max = parseInt(quantityInput.max);
+    if (current < max) quantityInput.value = current + 1;
+  });
+
+  // Add to cart button
+  const addToCartBtn = document.getElementById('addToCartBtn');
+  addToCartBtn.addEventListener('click', function() {
+    const productId = this.dataset.productId;
+    const quantity = parseInt(quantityInput.value);
+    const options = {};
+
+    // Collect selected options
+    document.querySelectorAll('[name^="option_"]').forEach(input => {
+      if (input.checked || input.tagName === 'SELECT') {
+        options[input.name] = input.value;
+      }
+    });
+
+    // Add to cart via API
+    fetch('/api/cart/add', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        product_id: productId,
+        quantity: quantity,
+        options: options
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Show success message
+        showNotification('Product added to cart!', 'success');
+        // Update cart count
+        updateCartCount();
+      }
+    })
+    .catch(error => console.error('Error:', error));
+  });
+
+  // Tab functionality
+  const tabButtons = document.querySelectorAll('.tab-btn');
+  tabButtons.forEach(btn => {
+    btn.addEventListener('click', function() {
+      const tabName = this.dataset.tab;
+      tabButtons.forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      this.classList.add('active');
+      document.getElementById(tabName).classList.add('active');
+    });
+  });
+});
+
+function showNotification(message, type) {
+  const notification = document.createElement('div');
+  notification.className = `notification notification-${type}`;
+  notification.textContent = message;
+  document.body.appendChild(notification);
+  setTimeout(() => notification.remove(), 3000);
+}
+
+function updateCartCount() {
+  fetch('/api/cart/count')
+    .then(response => response.json())
+    .then(data => {
+      document.querySelector('.cart-count').textContent = data.count;
+    });
+}
+</script>
+{% endblock %}

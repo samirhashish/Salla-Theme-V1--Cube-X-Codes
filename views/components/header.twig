@@ -1,0 +1,343 @@
+{# ============================================================================
+   Header Component
+   Navigation, search, and cart icon
+   ============================================================================ #}
+
+<header class="header">
+  <div class="container">
+    <div class="header__top">
+      {# Logo #}
+      <div class="header__logo">
+        <a href="/">
+          <img src="{{ store.logo }}" alt="{{ store.name }}" class="logo-image">
+          <span class="logo-text">{{ store.name }}</span>
+        </a>
+      </div>
+
+      {# Search Bar #}
+      <div class="header__search">
+        <form action="/search" method="GET" class="search-form">
+          <input 
+            type="search" 
+            name="q" 
+            placeholder="Search products..."
+            class="search-input"
+            autocomplete="off"
+          >
+          <button type="submit" class="search-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.35-4.35"/>
+            </svg>
+          </button>
+        </form>
+      </div>
+
+      {# Header Actions #}
+      <div class="header__actions">
+        {# Account #}
+        <a href="/account" class="header__action" title="Account">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          <span class="action-label">Account</span>
+        </a>
+
+        {# Wishlist #}
+        <a href="/wishlist" class="header__action" title="Wishlist">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+          <span class="action-label">Wishlist</span>
+        </a>
+
+        {# Cart Icon - CRO Important #}
+        <button 
+          class="header__action header__cart" 
+          data-toggle="cart"
+          title="Shopping Cart"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="9" cy="21" r="1"/>
+            <circle cx="20" cy="21" r="1"/>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+          </svg>
+          <span class="cart-count">{{ cart.items | length }}</span>
+          <span class="action-label">Cart</span>
+        </button>
+      </div>
+    </div>
+
+    {# Navigation Menu #}
+    <nav class="header__nav">
+      <div class="nav-container">
+        {# Main Menu #}
+        <ul class="nav-menu">
+          {% for category in store.categories %}
+            <li class="nav-item">
+              <a href="{{ category.url }}" class="nav-link">
+                {{ category.name }}
+              </a>
+              
+              {# Submenu #}
+              {% if category.subcategories %}
+                <ul class="nav-submenu">
+                  {% for subcategory in category.subcategories %}
+                    <li>
+                      <a href="{{ subcategory.url }}">{{ subcategory.name }}</a>
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            </li>
+          {% endfor %}
+
+          {# Special Offers #}
+          <li class="nav-item nav-item--highlight">
+            <a href="/offers" class="nav-link nav-link--highlight">
+              🎉 Special Offers
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<style scoped>
+.header {
+  background: var(--color-white);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  box-shadow: var(--shadow-sm);
+}
+
+.header__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-lg) 0;
+  gap: var(--spacing-lg);
+}
+
+.header__logo {
+  flex-shrink: 0;
+}
+
+.header__logo a {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  text-decoration: none;
+}
+
+.logo-image {
+  height: 40px;
+  width: auto;
+}
+
+.logo-text {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.header__search {
+  flex: 1;
+  max-width: 400px;
+}
+
+.search-form {
+  display: flex;
+  align-items: center;
+  background: var(--color-background);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  transition: border-color var(--transition-base);
+}
+
+.search-form:focus-within {
+  border-color: var(--color-primary);
+}
+
+.search-input {
+  flex: 1;
+  padding: var(--spacing-md);
+  border: none;
+  background: none;
+  font-size: 1rem;
+}
+
+.search-btn {
+  padding: var(--spacing-md);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  transition: color var(--transition-base);
+}
+
+.search-btn:hover {
+  color: var(--color-primary);
+}
+
+.header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+}
+
+.header__action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--color-text);
+  text-decoration: none;
+  transition: color var(--transition-base);
+  position: relative;
+}
+
+.header__action:hover {
+  color: var(--color-primary);
+}
+
+.header__action svg {
+  width: 24px;
+  height: 24px;
+}
+
+.action-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.header__cart {
+  position: relative;
+}
+
+.cart-count {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: var(--color-accent);
+  color: var(--color-white);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.header__nav {
+  border-top: 1px solid var(--color-border);
+  padding: var(--spacing-md) 0;
+}
+
+.nav-menu {
+  display: flex;
+  list-style: none;
+  gap: var(--spacing-2xl);
+  flex-wrap: wrap;
+}
+
+.nav-item {
+  position: relative;
+}
+
+.nav-link {
+  color: var(--color-text);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color var(--transition-base);
+  display: block;
+  padding: var(--spacing-sm) 0;
+}
+
+.nav-link:hover {
+  color: var(--color-primary);
+}
+
+.nav-link--highlight {
+  color: var(--color-accent);
+  font-weight: 700;
+}
+
+.nav-submenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  list-style: none;
+  min-width: 200px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-dropdown);
+}
+
+.nav-item:hover .nav-submenu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.nav-submenu li {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.nav-submenu li:last-child {
+  border-bottom: none;
+}
+
+.nav-submenu a {
+  display: block;
+  padding: var(--spacing-md) var(--spacing-lg);
+  color: var(--color-text);
+  text-decoration: none;
+  transition: all var(--transition-base);
+}
+
+.nav-submenu a:hover {
+  background: var(--color-background);
+  color: var(--color-primary);
+  padding-right: calc(var(--spacing-lg) + 4px);
+}
+
+@media (max-width: 768px) {
+  .header__top {
+    flex-wrap: wrap;
+    padding: var(--spacing-md) 0;
+  }
+
+  .header__search {
+    order: 3;
+    flex-basis: 100%;
+    max-width: none;
+  }
+
+  .header__nav {
+    order: 4;
+    flex-basis: 100%;
+  }
+
+  .nav-menu {
+    gap: var(--spacing-lg);
+  }
+
+  .action-label {
+    display: none;
+  }
+}
+</style>

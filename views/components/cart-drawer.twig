@@ -1,0 +1,300 @@
+{# ============================================================================
+   Cart Drawer Component - Mini Cart
+   CRO Optimized for Quick Checkout
+   ============================================================================ #}
+
+<div class="cart-overlay" id="cartOverlay"></div>
+
+<div class="cart-drawer" id="cartDrawer">
+  {# Header #}
+  <div class="cart-drawer__header">
+    <h2 class="cart-drawer__title">
+      Shopping Cart
+      <span class="cart-count" id="cartCount">{{ cart.items | length }}</span>
+    </h2>
+    <button class="cart-drawer__close" id="closeCartDrawer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  {# Cart Items #}
+  <div class="cart-drawer__items" id="cartItems">
+    {% if cart.items %}
+      {% for item in cart.items %}
+        <div class="cart-drawer__item" data-item-id="{{ item.id }}">
+          {# Product Image #}
+          <div class="cart-drawer__item-image">
+            <img 
+              src="{{ item.product.image.url }}" 
+              alt="{{ item.product.name }}"
+              loading="lazy"
+            >
+          </div>
+
+          {# Product Info #}
+          <div class="cart-drawer__item-info">
+            <h3 class="cart-drawer__item-title">{{ item.product.name }}</h3>
+            <div class="cart-drawer__item-price">{{ item.price | currency }}</div>
+
+            {# Quantity Controls #}
+            <div class="cart-drawer__item-quantity">
+              <button class="qty-decrease" data-item-id="{{ item.id }}">−</button>
+              <input 
+                type="number" 
+                class="qty-input" 
+                value="{{ item.quantity }}" 
+                min="1"
+                data-item-id="{{ item.id }}"
+              >
+              <button class="qty-increase" data-item-id="{{ item.id }}">+</button>
+              <button class="remove-btn" data-item-id="{{ item.id }}" title="Remove">
+                ✕
+              </button>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-cart-message">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="9" cy="21" r="1"/>
+          <circle cx="20" cy="21" r="1"/>
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+        </svg>
+        <p>Your cart is empty</p>
+        <a href="/products" class="btn btn-primary btn-sm">
+          Start Shopping
+        </a>
+      </div>
+    {% endif %}
+  </div>
+
+  {# Footer with Summary and Checkout #}
+  {% if cart.items %}
+    <div class="cart-drawer__footer">
+      {# Total Price #}
+      <div class="cart-drawer__total">
+        <span>Total:</span>
+        <strong id="cartTotal">{{ cart.total | currency }}</strong>
+      </div>
+
+      {# Checkout Button - Primary CTA #}
+      <a href="/checkout" class="btn btn-primary btn-lg btn-block cart-drawer__checkout-btn">
+        Proceed to Checkout
+      </a>
+
+      {# View Cart Link #}
+      <a href="/cart" class="btn btn-outline btn-block cart-drawer__continue-shopping-btn">
+        View Full Cart
+      </a>
+
+      {# Trust Badges #}
+      <div class="cart-drawer-trust-badges">
+        <div class="badge">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+          </svg>
+          <span>Secure</span>
+        </div>
+        <div class="badge">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+          </svg>
+          <span>Returns</span>
+        </div>
+        <div class="badge">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+          </svg>
+          <span>Free Ship</span>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+{# JavaScript for Cart Drawer Interactions #}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const cartDrawer = document.getElementById('cartDrawer');
+  const cartOverlay = document.getElementById('cartOverlay');
+  const closeBtn = document.getElementById('closeCartDrawer');
+  const cartIcon = document.querySelector('[data-toggle="cart"]');
+
+  // Open cart drawer
+  if (cartIcon) {
+    cartIcon.addEventListener('click', function(e) {
+      e.preventDefault();
+      openCartDrawer();
+    });
+  }
+
+  // Close cart drawer
+  closeBtn.addEventListener('click', closeCartDrawer);
+  cartOverlay.addEventListener('click', closeCartDrawer);
+
+  // Quantity controls
+  document.querySelectorAll('.cart-drawer .qty-decrease').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const itemId = this.dataset.itemId;
+      const input = document.querySelector(`.cart-drawer [data-item-id="${itemId}"].qty-input`);
+      const current = parseInt(input.value);
+      if (current > 1) {
+        input.value = current - 1;
+        updateCartDrawerItem(itemId, current - 1);
+      }
+    });
+  });
+
+  document.querySelectorAll('.cart-drawer .qty-increase').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const itemId = this.dataset.itemId;
+      const input = document.querySelector(`.cart-drawer [data-item-id="${itemId}"].qty-input`);
+      const current = parseInt(input.value);
+      input.value = current + 1;
+      updateCartDrawerItem(itemId, current + 1);
+    });
+  });
+
+  // Remove item
+  document.querySelectorAll('.cart-drawer .remove-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const itemId = this.dataset.itemId;
+      removeCartDrawerItem(itemId);
+    });
+  });
+
+  // Keyboard shortcut to close (ESC key)
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && cartDrawer.classList.contains('open')) {
+      closeCartDrawer();
+    }
+  });
+});
+
+function openCartDrawer() {
+  const cartDrawer = document.getElementById('cartDrawer');
+  const cartOverlay = document.getElementById('cartOverlay');
+  cartDrawer.classList.add('open');
+  cartOverlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCartDrawer() {
+  const cartDrawer = document.getElementById('cartDrawer');
+  const cartOverlay = document.getElementById('cartOverlay');
+  cartDrawer.classList.remove('open');
+  cartOverlay.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function updateCartDrawerItem(itemId, quantity) {
+  fetch('/api/cart/update', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      item_id: itemId,
+      quantity: quantity
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      updateCartDrawerUI(data.cart);
+    }
+  })
+  .catch(error => console.error('Error:', error));
+}
+
+function removeCartDrawerItem(itemId) {
+  fetch('/api/cart/remove', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      item_id: itemId
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      // Remove item from DOM
+      const itemElement = document.querySelector(`[data-item-id="${itemId}"]`);
+      if (itemElement) {
+        itemElement.remove();
+      }
+      updateCartDrawerUI(data.cart);
+    }
+  })
+  .catch(error => console.error('Error:', error));
+}
+
+function updateCartDrawerUI(cart) {
+  // Update cart count
+  document.getElementById('cartCount').textContent = cart.items.length;
+
+  // Update total
+  document.getElementById('cartTotal').textContent = cart.total;
+
+  // Update cart icon badge if exists
+  const cartBadge = document.querySelector('.cart-icon-badge');
+  if (cartBadge) {
+    cartBadge.textContent = cart.items.length;
+  }
+}
+
+// Listen for cart updates from other tabs/windows
+window.addEventListener('storage', function(e) {
+  if (e.key === 'cartUpdated') {
+    location.reload();
+  }
+});
+</script>
+
+<style scoped>
+.cart-drawer-trust-badges {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.cart-drawer-trust-badges .badge {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.7rem;
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.empty-cart-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.empty-cart-message svg {
+  width: 60px;
+  height: 60px;
+  color: var(--color-border);
+  margin-bottom: 1rem;
+}
+
+.empty-cart-message p {
+  margin-bottom: 1rem;
+  color: var(--color-text-secondary);
+}
+</style>

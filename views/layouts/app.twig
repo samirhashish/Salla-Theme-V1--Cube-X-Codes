@@ -1,0 +1,60 @@
+{# ============================================================================
+   Main Layout Template
+   Base layout for all pages
+   ============================================================================ #}
+
+<!DOCTYPE html>
+<html lang="{{ store.language }}" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="{{ store.description }}">
+  <meta name="theme-color" content="#FFC107">
+  
+  <title>{% block title %}{{ store.name }}{% endblock %}</title>
+
+  {# Stylesheets #}
+  <link rel="stylesheet" href="{{ asset('css/main.css') }}">
+  
+  {# Fonts #}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  {# Favicon #}
+  <link rel="icon" type="image/svg+xml" href="{{ store.logo }}">
+
+  {# Additional Head Content #}
+  {% block head %}{% endblock %}
+</head>
+<body>
+  {# Skip to Content Link (Accessibility) #}
+  <a href="#main-content" class="skip-to-content">Skip to main content</a>
+
+  {# Header #}
+  {% include 'components/header.twig' %}
+
+  {# Promotional Banner #}
+  {% include 'components/promo-banner.twig' %}
+
+  {# Main Content #}
+  <main id="main-content" class="main-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  {# Cart Drawer #}
+  {% include 'components/cart-drawer.twig' %}
+
+  {# Newsletter Signup #}
+  {% include 'components/newsletter.twig' %}
+
+  {# Footer #}
+  {% include 'components/footer.twig' %}
+
+  {# Scripts #}
+  <script src="{{ asset('js/main.js') }}"></script>
+  
+  {# Additional Body Content #}
+  {% block scripts %}{% endblock %}
+</body>
+</html>

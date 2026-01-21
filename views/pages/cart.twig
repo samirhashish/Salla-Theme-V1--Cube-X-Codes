@@ -1,0 +1,360 @@
+{# ============================================================================
+   Cart Page Template - CRO Optimized
+   ============================================================================ #}
+
+{% extends "layouts/app.twig" %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-8">
+      {% if cart.items %}
+        {# Cart Items #}
+        <div class="cart__items">
+          <h1>Shopping Cart</h1>
+          <p class="text-secondary">{{ cart.items | length }} items in your cart</p>
+
+          {% for item in cart.items %}
+            <div class="cart__item" data-item-id="{{ item.id }}">
+              {# Product Image #}
+              <div class="cart__item-image">
+                <img 
+                  src="{{ item.product.image.url }}" 
+                  alt="{{ item.product.name }}"
+                  loading="lazy"
+                >
+              </div>
+
+              {# Product Details #}
+              <div class="cart__item-details">
+                <h3 class="cart__item-title">{{ item.product.name }}</h3>
+
+                {# Product Options #}
+                {% if item.options %}
+                  <div class="item-options">
+                    {% for option_name, option_value in item.options %}
+                      <small>{{ option_name }}: {{ option_value }}</small>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+
+                <div class="cart__item-price">
+                  {{ item.price | currency }}
+                </div>
+
+                {# Quantity Selector #}
+                <div class="cart__item-quantity">
+                  <button class="qty-decrease" data-item-id="{{ item.id }}">−</button>
+                  <input 
+                    type="number" 
+                    class="qty-input" 
+                    value="{{ item.quantity }}" 
+                    min="1"
+                    data-item-id="{{ item.id }}"
+                  >
+                  <button class="qty-increase" data-item-id="{{ item.id }}">+</button>
+                </div>
+
+                {# Remove Item #}
+                <div class="cart__item-remove">
+                  <button class="remove-item" data-item-id="{{ item.id }}">
+                    Remove
+                  </button>
+                </div>
+              </div>
+
+              {# Item Total #}
+              <div class="cart__item-total">
+                <strong>{{ (item.price * item.quantity) | currency }}</strong>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+        {# Continue Shopping Button #}
+        <a href="/products" class="btn btn-outline btn-lg mt-2">
+          Continue Shopping
+        </a>
+
+      {% else %}
+        {# Empty Cart State - CRO Important #}
+        <div class="cart__empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="9" cy="21" r="1"/>
+            <circle cx="20" cy="21" r="1"/>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+          </svg>
+
+          <h2>Your Cart is Empty</h2>
+          <p>Start shopping to add items to your cart</p>
+
+          <a href="/products" class="btn btn-primary btn-lg">
+            Continue Shopping
+          </a>
+
+          {# Related Products for Empty Cart #}
+          {% if recommended_products %}
+            <div class="mt-3">
+              <h3>You might like</h3>
+              <div class="row">
+                {% for product in recommended_products | slice(0, 4) %}
+                  <div class="col-3">
+                    {% include 'components/product-card.twig' with { product: product } %}
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+
+    {# Cart Summary - Sticky Sidebar - CRO Critical #}
+    <div class="col-4">
+      <div class="cart__summary">
+        <h2>Order Summary</h2>
+
+        {# Subtotal #}
+        <div class="cart__summary-row">
+          <span>Subtotal</span>
+          <span>{{ cart.subtotal | currency }}</span>
+        </div>
+
+        {# Discount #}
+        {% if cart.discount %}
+          <div class="cart__summary-row discount">
+            <span>Discount</span>
+            <span>-{{ cart.discount | currency }}</span>
+          </div>
+        {% endif %}
+
+        {# Shipping #}
+        {% if cart.shipping_cost %}
+          <div class="cart__summary-row">
+            <span>Shipping</span>
+            <span>
+              {% if cart.shipping_cost == 0 %}
+                <strong>FREE</strong>
+              {% else %}
+                {{ cart.shipping_cost | currency }}
+              {% endif %}
+            </span>
+          </div>
+        {% else %}
+          <div class="cart__summary-row">
+            <span>Shipping</span>
+            <span>Calculated at checkout</span>
+          </div>
+        {% endif %}
+
+        {# Free Shipping Threshold - CRO Motivator #}
+        {% if cart.subtotal < free_shipping_threshold %}
+          <div class="cart__shipping-info">
+            <strong>Spend {{ (free_shipping_threshold - cart.subtotal) | currency }} more for FREE SHIPPING!</strong>
+          </div>
+        {% endif %}
+
+        {# Taxes #}
+        {% if cart.tax %}
+          <div class="cart__summary-row">
+            <span>Tax</span>
+            <span>{{ cart.tax | currency }}</span>
+          </div>
+        {% endif %}
+
+        {# Total #}
+        <div class="cart__summary-row total">
+          <span>Total</span>
+          <span>{{ cart.total | currency }}</span>
+        </div>
+
+        {# Coupon Code Input #}
+        <div class="cart__coupon">
+          <input 
+            type="text" 
+            id="couponInput" 
+            placeholder="Enter coupon code"
+            class="coupon-input"
+          >
+          <button id="applyCouponBtn" class="btn btn-secondary btn-block">
+            Apply Coupon
+          </button>
+        </div>
+
+        {# Checkout Button - Primary CTA #}
+        <button id="checkoutBtn" class="btn btn-primary btn-lg btn-block cart__checkout-btn">
+          Proceed to Checkout
+        </button>
+
+        {# Continue Shopping #}
+        <a href="/products" class="btn btn-outline btn-block cart__continue-shopping">
+          Continue Shopping
+        </a>
+
+        {# Trust Badges #}
+        <div class="trust-badges mt-2">
+          <div class="badge">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+            </svg>
+            <span>Secure Checkout</span>
+          </div>
+          <div class="badge">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+            <span>14-Day Returns</span>
+          </div>
+          <div class="badge">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+            </svg>
+            <span>Free Shipping</span>
+          </div>
+        </div>
+
+        {# Payment Methods #}
+        <div class="payment-methods mt-2">
+          <h4>We Accept</h4>
+          <div class="methods-icons">
+            <svg class="payment-icon" viewBox="0 0 24 24"><!-- Visa --></svg>
+            <svg class="payment-icon" viewBox="0 0 24 24"><!-- Mastercard --></svg>
+            <svg class="payment-icon" viewBox="0 0 24 24"><!-- PayPal --></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# JavaScript for Cart Interactions #}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Quantity controls
+  document.querySelectorAll('.qty-decrease').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const itemId = this.dataset.itemId;
+      const input = document.querySelector(`[data-item-id="${itemId}"].qty-input`);
+      const current = parseInt(input.value);
+      if (current > 1) {
+        input.value = current - 1;
+        updateCartItem(itemId, current - 1);
+      }
+    });
+  });
+
+  document.querySelectorAll('.qty-increase').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const itemId = this.dataset.itemId;
+      const input = document.querySelector(`[data-item-id="${itemId}"].qty-input`);
+      const current = parseInt(input.value);
+      input.value = current + 1;
+      updateCartItem(itemId, current + 1);
+    });
+  });
+
+  // Quantity input change
+  document.querySelectorAll('.qty-input').forEach(input => {
+    input.addEventListener('change', function() {
+      const itemId = this.dataset.itemId;
+      const quantity = parseInt(this.value);
+      if (quantity > 0) {
+        updateCartItem(itemId, quantity);
+      }
+    });
+  });
+
+  // Remove item
+  document.querySelectorAll('.remove-item').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const itemId = this.dataset.itemId;
+      removeCartItem(itemId);
+    });
+  });
+
+  // Apply coupon
+  document.getElementById('applyCouponBtn').addEventListener('click', function() {
+    const couponCode = document.getElementById('couponInput').value;
+    if (couponCode.trim()) {
+      applyCoupon(couponCode);
+    }
+  });
+
+  // Checkout button
+  document.getElementById('checkoutBtn').addEventListener('click', function() {
+    window.location.href = '/checkout';
+  });
+});
+
+function updateCartItem(itemId, quantity) {
+  fetch('/api/cart/update', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      item_id: itemId,
+      quantity: quantity
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      location.reload();
+    }
+  })
+  .catch(error => console.error('Error:', error));
+}
+
+function removeCartItem(itemId) {
+  if (confirm('Are you sure you want to remove this item?')) {
+    fetch('/api/cart/remove', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        item_id: itemId
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        location.reload();
+      }
+    })
+    .catch(error => console.error('Error:', error));
+  }
+}
+
+function applyCoupon(couponCode) {
+  fetch('/api/cart/coupon', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      code: couponCode
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      showNotification('Coupon applied successfully!', 'success');
+      location.reload();
+    } else {
+      showNotification(data.message || 'Invalid coupon code', 'error');
+    }
+  })
+  .catch(error => console.error('Error:', error));
+}
+
+function showNotification(message, type) {
+  const notification = document.createElement('div');
+  notification.className = `notification notification-${type}`;
+  notification.textContent = message;
+  document.body.appendChild(notification);
+  setTimeout(() => notification.remove(), 3000);
+}
+</script>
+{% endblock %}

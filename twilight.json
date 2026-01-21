@@ -1,0 +1,46 @@
+{
+  "name": "Vitrine Furniture Theme",
+  "description": "A premium e-commerce theme inspired by Vitrine Furniture with focus on CRO, UI, and UX",
+  "version": "1.0.0",
+  "author": "Your Name",
+  "license": "MIT",
+  "homepage": "https://github.com/yourusername/salla-vitrine-theme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/salla-vitrine-theme.git"
+  },
+  "support": {
+    "email": "support@example.com",
+    "url": "https://example.com/support"
+  },
+  "theme": {
+    "colors": {
+      "primary": "#FFC107",
+      "secondary": "#1A237E",
+      "accent": "#FF5722",
+      "background": "#FFFFFF",
+      "text": "#212121",
+      "lightGray": "#F5F5F5",
+      "darkGray": "#757575"
+    },
+    "fonts": {
+      "primary": "Poppins",
+      "secondary": "Inter"
+    }
+  },
+  "settings": {
+    "rtl": true,
+    "supportedLanguages": ["ar", "en"],
+    "currency": "EGP"
+  },
+  "components": [
+    "header",
+    "footer",
+    "product-card",
+    "product-page",
+    "cart",
+    "cart-drawer",
+    "checkout",
+    "newsletter"
+  ]
+}
