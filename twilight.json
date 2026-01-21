@@ -1,18 +1,34 @@
 {
   "name": "Vitrine Furniture Theme",
-  "description": "A premium e-commerce theme inspired by Vitrine Furniture with focus on CRO, UI, and UX",
+  "description": "Premium CRO-optimized Salla theme inspired by Vitrine Furniture. Features product page, shopping cart, cart drawer, and conversion optimization techniques.",
   "version": "1.0.0",
-  "author": "Your Name",
+  "author": "Cube X Codes",
   "license": "MIT",
-  "homepage": "https://github.com/yourusername/salla-vitrine-theme",
+  "homepage": "https://github.com/samirhashish/Salla-Theme-V1--Cube-X-Codes",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/salla-vitrine-theme.git"
+    "url": "https://github.com/samirhashish/Salla-Theme-V1--Cube-X-Codes.git"
   },
   "support": {
-    "email": "support@example.com",
-    "url": "https://example.com/support"
+    "email": "support@cubexcodes.com",
+    "url": "https://github.com/samirhashish/Salla-Theme-V1--Cube-X-Codes"
   },
+  "keywords": [
+    "salla",
+    "theme",
+    "ecommerce",
+    "cro",
+    "conversion",
+    "furniture",
+    "responsive"
+  ],
+  "category": "furniture",
+  "tags": [
+    "CRO",
+    "Responsive",
+    "Modern",
+    "Conversion Optimized"
+  ],
   "theme": {
     "colors": {
       "primary": "#FFC107",
@@ -26,13 +42,28 @@
     "fonts": {
       "primary": "Poppins",
       "secondary": "Inter"
+    },
+    "breakpoints": {
+      "mobile": 480,
+      "tablet": 768,
+      "desktop": 1024
     }
   },
   "settings": {
     "rtl": true,
-    "supportedLanguages": ["ar", "en"],
+    "supportedLanguages": [
+      "ar",
+      "en"
+    ],
     "currency": "EGP"
   },
+  "pages": [
+    "home",
+    "product",
+    "cart",
+    "checkout",
+    "account"
+  ],
   "components": [
     "header",
     "footer",
@@ -41,6 +72,19 @@
     "cart",
     "cart-drawer",
     "checkout",
-    "newsletter"
-  ]
+    "newsletter",
+    "promo-banner"
+  ],
+  "features": {
+    "cro": true,
+    "responsive": true,
+    "accessibility": true,
+    "seo": true,
+    "performance": true,
+    "security": true
+  },
+  "requirements": {
+    "sallaVersion": ">=1.0.0",
+    "nodeVersion": ">=14.0.0"
+  }
 }
